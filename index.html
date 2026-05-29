@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankofa Impact Initiative - Donor Transparency Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for beautiful visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
+
+    <!-- Top Navigation / Brand Banner -->
+    <header class="bg-gradient-to-r from-teal-900 to-emerald-950 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <div class="bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">
+                    <span class="text-2xl">🌱</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-tight">SANKOFA</h1>
+                    <p class="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase">Impact Initiative Ghana</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 font-medium">
+                <!-- Currency Toggle Button -->
+                <button onclick="toggleCurrency()" id="currency-toggle-btn" class="bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-3 py-1.5 rounded-xl transition-all flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    Switch to USD ($)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        
+        <!-- Editable Controls Banner -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 text-white p-2 rounded-xl">
+                    <i data-lucide="sliders" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-amber-950">Live Dashboard Editor Panel</h3>
+                    <p class="text-xs text-amber-800">Change values here to simulate live modifications before saving your code file.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:flex gap-3 w-full md:w-auto">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-amber-700 mb-1">Total Funds Raised</label>
+                    <input type="number" id="control-total-raised" value="345900" oninput="applyLiveUpdates()" class="w-full sm:w-28 bg-white border border-amber-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-amber-700 mb-1">Exchange Rate ($1 = GH₵)</label>
+                    <input type="number" id="control-exchange-rate" value="14.5" step="0.1" oninput="applyLiveUpdates()" class="w-full sm:w-24 bg-white border border-amber-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-amber-700 mb-1">NGO License Status</label>
+                    <select id="control-license-status" onchange="applyLiveUpdates()" class="w-full sm:w-28 bg-white border border-amber-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <option value="Active & Verified">Active & Verified</option>
+                        <option value="Renewal Pending">Renewal Pending</option>
+                        <option value="Under Review">Under Review</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Section/Pitch Header -->
+        <div class="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm mb-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
+            <div class="relative z-10 max-w-3xl">
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Locally Led, Globally Trusted</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-3 tracking-tight">Every Cedi Accounted For. Every Community Uplifted.</h2>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                    Welcome to our open-source transparency dashboard. We believe donors deserve absolute visibility. Use this interactive micro-portal to track our current projects, verify budget allocations, and simulate the exact community impact of your potential support.
+                </p>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Raised (2026)</span>
+                    <span class="p-1.5 bg-teal-50 text-teal-600 rounded-lg"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-xl md:text-2xl font-black text-slate-900 mt-2 font-mono" id="card-total-raised">GH₵ 345,900</div>
+                <p class="text-[10px] text-teal-600 mt-1 font-semibold">100% locally & diaspora funded</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Direct Aid Ratio</span>
+                    <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="shield-check" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-xl md:text-2xl font-black text-slate-900 mt-2">84.5%</div>
+                <p class="text-[10px] text-slate-500 mt-1">Directly spent on field programs</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lives Impacted</span>
+                    <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="users" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-xl md:text-2xl font-black text-slate-900 mt-2">12,450+</div>
+                <p class="text-[10px] text-slate-500 mt-1">Across 8 rural communities</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Audit Standing</span>
+                    <span class="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-xl md:text-2xl font-black text-slate-900 mt-2">Clean Pass</div>
+                <p class="text-[10px] text-emerald-600 mt-1 font-semibold">Accra DPC Registered</p>
+            </div>
+        </div>
+
+        <!-- Grid: Charts, Projects, Sandbox -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+            
+            <!-- Left Panel: Budget Breakdown & Donation Simulator -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Section 1: Visual Budget Breakdown -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                        <div class="flex items-center gap-2.5">
+                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                                <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Current Budget Allocation</h3>
+                                <p class="text-xs text-slate-500">Interactive live operational split</p>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-400 italic">Updated: May 2026</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        <div class="md:col-span-5 flex justify-center max-h-[220px]">
+                            <canvas id="budgetChart"></canvas>
+                        </div>
+                        <div class="md:col-span-7 space-y-4">
+                            <div class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all">
+                                <span class="w-3.5 h-3.5 rounded-full bg-teal-600 mt-1"></span>
+                                <div class="flex-1 flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-sm text-slate-800">84.5% - Direct Program Aid</h4>
+                                        <p class="text-xs text-slate-500">Diapers, maternal wellness kits, clean water supplies.</p>
+                                    </div>
+                                    <div class="font-bold text-sm text-teal-700 font-mono" id="breakdown-aid">GH₵ 292,285.50</div>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all">
+                                <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 mt-1"></span>
+                                <div class="flex-1 flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-sm text-slate-800">10.5% - Field Logistics</h4>
+                                        <p class="text-xs text-slate-500">Transit to remote regions, wholesale dispatch costs.</p>
+                                    </div>
+                                    <div class="font-bold text-sm text-emerald-700 font-mono" id="breakdown-ops">GH₵ 36,319.50</div>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all">
+                                <span class="w-3.5 h-3.5 rounded-full bg-slate-300 mt-1"></span>
+                                <div class="flex-1 flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-sm text-slate-800">5.0% - Administration</h4>
+                                        <p class="text-xs text-slate-500">Accounting systems, regulatory compliance filings.</p>
+                                    </div>
+                                    <div class="font-bold text-sm text-slate-600 font-mono" id="breakdown-admin">GH₵ 17,295.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Donation Impact Simulator Sandbox -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                            <i data-lucide="calculator" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900">Donation Impact Simulator</h3>
+                            <p class="text-xs text-slate-500">Slide or input an amount to evaluate distribution models</p>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl text-white mb-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <label class="text-[10px] uppercase tracking-wider font-bold text-indigo-300 block mb-1">Simulated Contribution</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl font-bold text-slate-300" id="sim-currency-symbol">GH₵</span>
+                                    <input type="number" id="sim-input" value="1000" class="bg-white/10 text-3xl font-extrabold w-36 border-b border-indigo-400 focus:outline-none focus:border-white p-1 rounded-md text-white font-mono">
+                                </div>
+                            </div>
+                            <div class="w-full sm:w-1/2">
+                                <input type="range" id="sim-slider" min="100" max="25000" step="100" value="1000" class="w-full accent-emerald-400 bg-white/20 h-2 rounded-lg cursor-pointer">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1.5 font-bold">
+                                    <span id="slider-min-text">GH₵ 100</span>
+                                    <span id="slider-max-text">GH₵ 25,000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 block uppercase">To Program Deliverables</span>
+                            <div class="text-xl font-bold text-teal-700 mt-1 font-mono" id="sim-aid">GH₵ 845.00</div>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 block uppercase">To Field Operations</span>
+                            <div class="text-xl font-bold text-emerald-700 mt-1 font-mono" id="sim-ops">GH₵ 105.00</div>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 block uppercase">To Administrative Cost</span>
+                            <div class="text-xl font-bold text-slate-700 mt-1 font-mono" id="sim-admin">GH₵ 50.00</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-start gap-3">
+                        <span class="text-2xl">💡</span>
+                        <div>
+                            <h4 class="font-bold text-xs text-emerald-950 uppercase tracking-wide">Real-World Community Impact Equivalent</h4>
+                            <p class="text-xs text-emerald-800 mt-1 font-medium" id="impact-equivalent-text">
+                                This simulated amount supplies approximately 3 families with premium maternal packages.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Clickable Regional Filter Map & Payments -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Regional Map & Filter Panel -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-slate-900">Project Geographic Focus</h3>
+                        <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md" id="active-project-count">3 Active</span>
+                    </div>
+
+                    <!-- Interactive SVG Map Layout Mockup representing Ghana Regions -->
+                    <div class="bg-slate-900 rounded-2xl p-4 mb-4 flex flex-col items-center justify-center relative overflow-hidden h-44">
+                        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                        
+                        <!-- Map Visual Nodes -->
+                        <svg class="w-full h-full max-w-[140px]" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Northern Node Box -->
+                            <path id="map-poly-north" onclick="filterProjects('north')" class="cursor-pointer transition-all duration-300 fill-slate-700 hover:fill-teal-600 stroke-slate-800" stroke-width="1.5" d="M10 10 H90 V65 H10 Z"/>
+                            <!-- Southern Node Box -->
+                            <path id="map-poly-south" onclick="filterProjects('south')" class="cursor-pointer transition-all duration-300 fill-slate-600 hover:fill-emerald-600 stroke-slate-800" stroke-width="1.5" d="M10 65 H90 V140 H10 Z"/>
+                            
+                            <!-- Node Labels -->
+                            <text x="50" y="40" fill="#ffffff" font-size="7" font-weight="bold" text-anchor="middle" class="pointer-events-none tracking-wider">NORTHERN SECTOR</text>
+                            <text x="50" y="105" fill="#ffffff" font-size="7" font-weight="bold" text-anchor="middle" class="pointer-events-none tracking-wider">SOUTHERN SECTOR</text>
+                        </svg>
+                    </div>
+
+                    <div class="flex gap-2 mb-4 bg-slate-50 p-1 rounded-xl">
+                        <button onclick="filterProjects('all')" id="btn-all" class="flex-1 text-center py-2 text-xs font-bold rounded-lg bg-white text-slate-900 shadow-sm transition">All</button>
+                        <button onclick="filterProjects('north')" id="btn-north" class="flex-1 text-center py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-900 transition">North</button>
+                        <button onclick="filterProjects('south')" id="btn-south" class="flex-1 text-center py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-900 transition">South</button>
+                    </div>
+
+                    <!-- Project List Container -->
+                    <div class="space-y-3.5" id="project-container">
+                        <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl relative transition-all duration-300" data-sector="north">
+                            <span class="absolute top-3.5 right-3.5 text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded-md">92% funded</span>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">🚰</span>
+                                <h4 class="font-bold text-sm text-slate-900">Borehole Initiative</h4>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-2">Providing solar water to clinic clusters.</p>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold font-mono uppercase">
+                                <span>Upper West</span>
+                                <span class="project-cap" data-base="45000">GH₵ 45,000</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl relative transition-all duration-300" data-sector="south">
+                            <span class="absolute top-3.5 right-3.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">80% funded</span>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">👶</span>
+                                <h4 class="font-bold text-sm text-slate-900">Maternal Outreach</h4>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-2">Distributing welfare kits & diapers directly.</p>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold font-mono uppercase">
+                                <span>Greater Accra Rural</span>
+                                <span class="project-cap" data-base="25000">GH₵ 25,000</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl relative transition-all duration-300" data-sector="north">
+                            <span class="absolute top-3.5 right-3.5 text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded-md">Fully Funded</span>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">📚</span>
+                                <h4 class="font-bold text-sm text-slate-900">Community Classrooms</h4>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-2">Desks and textbook packages for local primary schools.</p>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold font-mono uppercase">
+                                <span>Northern Region</span>
+                                <span class="project-cap" data-base="30000">GH₵ 30,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direct MoMo / Mobile Payment Details -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <h3 class="font-bold text-slate-900 mb-1.5 flex items-center gap-2">
+                        <span class="p-1 bg-teal-50 text-teal-600 rounded-md"><i data-lucide="phone-call" class="w-4 h-4"></i></span>
+                        Direct Donation Channels
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Transfer channels verified under local registration frameworks.</p>
+
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center font-black text-xs text-slate-900">MTN</div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">MoMo Account</h4>
+                                    <span class="text-[10px] text-slate-500">0591234567</span>
+                                </div>
+                            </div>
+                            <button onclick="copyDetail('0591234567', 'MTN Account')" class="p-1.5 bg-white text-slate-600 hover:text-slate-950 rounded-lg border border-slate-200">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-[10px] text-white">T-cel</div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">Telecel Cash</h4>
+                                    <span class="text-[10px] text-slate-500">0201234567</span>
+                                </div>
+                            </div>
+                            <button onclick="copyDetail('0201234567', 'Telecel Account')" class="p-1.5 bg-white text-slate-600 hover:text-slate-950 rounded-lg border border-slate-200">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-teal-800 flex items-center justify-center font-bold text-xs text-white">🏦</div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">Ecobank Ghana</h4>
+                                    <span class="text-[10px] text-slate-500">1441002345678</span>
+                                </div>
+                            </div>
+                            <button onclick="copyDetail('1441002345678', 'Ecobank Account')" class="p-1.5 bg-white text-slate-600 hover:text-slate-950 rounded-lg border border-slate-200">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section 3: Compliance & Regulatory Licenses Section -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm mb-6">
+            <div class="flex items-center gap-2.5 mb-4">
+                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <i data-lucide="award" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900">Compliance & Regulatory Licensing</h3>
+                    <p class="text-xs text-slate-500">Verified institutional status with Ghanaian statutory bodies</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Registration Card 1 -->
+                <div class="p-4 border border-slate-100 rounded-2xl bg-slate-50/50 flex gap-3 items-start">
+                    <div class="p-2 bg-teal-50 text-teal-700 rounded-xl mt-0.5">
+                        <i data-lucide="landmark" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Registrar General's Dept</h4>
+                        <p class="text-sm font-bold text-slate-800 mt-0.5">NGO Reg No: G-45,221</p>
+                        <div class="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="license-status-badge-1">Active & Verified</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Card 2 -->
+                <div class="p-4 border border-slate-100 rounded-2xl bg-slate-50/50 flex gap-3 items-start">
+                    <div class="p-2 bg-indigo-50 text-indigo-700 rounded-xl mt-0.5">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Data Protection (DPC)</h4>
+                        <p class="text-sm font-bold text-slate-800 mt-0.5">Reg Cert: #DPC-883921</p>
+                        <div class="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="license-status-badge-2">Active & Verified</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Card 3 -->
+                <div class="p-4 border border-slate-100 rounded-2xl bg-slate-50/50 flex gap-3 items-start">
+                    <div class="p-2 bg-amber-50 text-amber-700 rounded-xl mt-0.5">
+                        <i data-lucide="scale" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Social Welfare Dept</h4>
+                        <p class="text-sm font-bold text-slate-800 mt-0.5">Permit No: DSW/NGO/7732</p>
+                        <div class="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="license-status-badge-3">Active & Verified</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Toast Notification -->
+        <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white py-3 px-6 rounded-full shadow-xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-50">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span id="toast-message" class="text-xs font-semibold">Copied!</span>
+        </div>
+
+    </main>
+
+    <footer class="max-w-6xl mx-auto px-4 mt-12 text-center text-slate-400 text-xs">
+        <p>© 2026 Sankofa Impact Initiative Ghana. All rights reserved.</p>
+        <p class="mt-1">Registered NGO Reg No: G-45,221. Certified by Ghana Data Protection Commission (DPC).</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // STATE MANAGER
+        let currentCurrency = 'GHS'; // 'GHS' or 'USD'
+        
+        // INPUT CONTROLS SELECTORS
+        const ctrlTotalRaised = document.getElementById('control-total-raised');
+        const ctrlExchangeRate = document.getElementById('control-exchange-rate');
+        const ctrlLicenseStatus = document.getElementById('control-license-status');
+        
+        // UI ELEMENT SELECTORS
+        const cardTotalRaised = document.getElementById('card-total-raised');
+        const breakdownAid = document.getElementById('breakdown-aid');
+        const breakdownOps = document.getElementById('breakdown-ops');
+        const breakdownAdmin = document.getElementById('breakdown-admin');
+        const simCurrencySymbol = document.getElementById('sim-currency-symbol');
+        const simInput = document.getElementById('sim-input');
+        const simSlider = document.getElementById('sim-slider');
+        const simAid = document.getElementById('sim-aid');
+        const simOps = document.getElementById('sim-ops');
+        const simAdmin = document.getElementById('sim-admin');
+        const impactText = document.getElementById('impact-equivalent-text');
+        const toggleBtn = document.getElementById('currency-toggle-btn');
+        const sliderMinText = document.getElementById('slider-min-text');
+        const sliderMaxText = document.getElementById('slider-max-text');
+
+        // CHART UTILITY
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        const budgetChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Program Aid', 'Field Logistics', 'Administration'],
+                datasets: [{
+                    data: [84.5, 10.5, 5.0],
+                    backgroundColor: ['#0d9488', '#10b981', '#cbd5e1'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
+        });
+
+        // RE-CALCULATION LOGIC
+        function formatValue(val) {
+            if (currentCurrency === 'GHS') {
+                return `GH₵ ${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            } else {
+                return `$ ${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+            }
+        }
+
+        function applyLiveUpdates() {
+            let baseTotal = parseFloat(ctrlTotalRaised.value) || 0;
+            let rate = parseFloat(ctrlExchangeRate.value) || 1;
+            let chosenStatus = ctrlLicenseStatus.value;
+
+            let convertedTotal = currentCurrency === 'GHS' ? baseTotal : (baseTotal / rate);
+            cardTotalRaised.textContent = formatValue(convertedTotal);
+
+            // Update Breakdown Panels
+            breakdownAid.textContent = formatValue(convertedTotal * 0.845);
+            breakdownOps.textContent = formatValue(convertedTotal * 0.105);
+            breakdownAdmin.textContent = formatValue(convertedTotal * 0.05);
+
+            // Update License Badges Text
+            document.getElementById('license-status-badge-1').textContent = chosenStatus;
+            document.getElementById('license-status-badge-2').textContent = chosenStatus;
+            document.getElementById('license-status-badge-3').textContent = chosenStatus;
+
+            // Dynamically change badge color themes depending on status state
+            const badges = ['license-status-badge-1', 'license-status-badge-2', 'license-status-badge-3'];
+            badges.forEach(id => {
+                const parent = document.getElementById(id).parentElement;
+                const dot = parent.querySelector('span');
+                if (chosenStatus === 'Active & Verified') {
+                    parent.className = "mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full";
+                    dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+                } else if (chosenStatus === 'Renewal Pending') {
+                    parent.className = "mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full";
+                    dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500";
+                } else {
+                    parent.className = "mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full";
+                    dot.className = "w-1.5 h-1.5 rounded-full bg-red-500";
+                }
+            });
+
+            // Update Project Caps
+            document.querySelectorAll('.project-cap').forEach(el => {
+                let baseCap = parseFloat(el.getAttribute('data-base'));
+                let displayCap = currentCurrency === 'GHS' ? baseCap : (baseCap / rate);
+                el.textContent = formatValue(displayCap);
+            });
+
+            // Trigger Simulator Update
+            updateSimulation(parseFloat(simInput.value) || 0);
+        }
+
+        function updateSimulation(val) {
+            let numVal = Math.max(0, val);
+            let rate = parseFloat(ctrlExchangeRate.value) || 1;
+            let checkValInGHS = currentCurrency === 'GHS' ? numVal : (numVal * rate);
+
+            simAid.textContent = formatValue(numVal * 0.845);
+            simOps.textContent = formatValue(numVal * 0.105);
+            simAdmin.textContent = formatValue(numVal * 0.05);
+
+            if (checkValInGHS < 250) {
+                impactText.textContent = `This configuration funds pure sanitization or supply delivery packs for a single remote household over a month.`;
+            } else if (checkValInGHS < 1000) {
+                let healthKits = Math.floor(checkValInGHS / 150);
+                impactText.textContent = `Secures roughly ${healthKits} premium local maternal wellness allocations & supply items for regional sector care.`;
+            } else if (checkValInGHS < 5000) {
+                let deskCount = Math.floor(checkValInGHS / 400);
+                impactText.textContent = `Secures durable classroom structural setups and textbook packages for around ${deskCount} youth individuals.`;
+            } else {
+                impactText.textContent = `This volume funds the total baseline manufacturing phase for an integrated clean solar gravity-well borehole matrix component.`;
+            }
+        }
+
+        // CURRENCY TOGGLE ACTIONS
+        function toggleCurrency() {
+            let rate = parseFloat(ctrlExchangeRate.value) || 1;
+            let currentSimValue = parseFloat(simInput.value) || 0;
+
+            if (currentCurrency === 'GHS') {
+                currentCurrency = 'USD';
+                toggleBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Switch to GHS (GH₵)`;
+                simCurrencySymbol.textContent = '$';
+                
+                simSlider.min = "10";
+                simSlider.max = "2000";
+                simSlider.step = "10";
+                sliderMinText.textContent = "$ 10";
+                sliderMaxText.textContent = "$ 2,000";
+                
+                simInput.value = (currentSimValue / rate).toFixed(0);
+                simSlider.value = (currentSimValue / rate).toFixed(0);
+            } else {
+                currentCurrency = 'GHS';
+                toggleBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Switch to USD ($)`;
+                simCurrencySymbol.textContent = 'GH₵';
+                
+                simSlider.min = "100";
+                simSlider.max = "25000";
+                simSlider.step = "100";
+                sliderMinText.textContent = "GH₵ 100";
+                sliderMaxText.textContent = "GH₵ 25,000";
+                
+                simInput.value = (currentSimValue * rate).toFixed(0);
+                simSlider.value = (currentSimValue * rate).toFixed(0);
+            }
+            lucide.createIcons();
+            applyLiveUpdates();
+        }
+
+        // SLIDER CONNECTIVITY BINDINGS
+        simSlider.addEventListener('input', (e) => {
+            simInput.value = e.target.value;
+            updateSimulation(parseFloat(e.target.value));
+        });
+        simInput.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value) || 0;
+            simSlider.value = val;
+            updateSimulation(val);
+        });
+
+        // REGIONAL FILTER MOCK SYSTEM WITH SVG MAP ACTIONS
+        function filterProjects(sector) {
+            const buttons = { all: document.getElementById('btn-all'), north: document.getElementById('btn-north'), south: document.getElementById('btn-south') };
+            const polyNorth = document.getElementById('map-poly-north');
+            const polySouth = document.getElementById('map-poly-south');
+
+            Object.keys(buttons).forEach(key => {
+                buttons[key].className = key === sector ? "flex-1 text-center py-2 text-xs font-bold rounded-lg bg-white text-slate-900 shadow-sm transition" : "flex-1 text-center py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-900 transition";
+            });
+
+            polyNorth.setAttribute('fill', sector === 'north' ? '#0d9488' : '#334155');
+            polySouth.setAttribute('fill', sector === 'south' ? '#10b981' : '#475569');
+
+            let visibleCount = 0;
+            document.querySelectorAll('#project-container > div').forEach(project => {
+                let match = sector === 'all' || project.getAttribute('data-sector') === sector;
+                project.style.display = match ? "block" : "none";
+                if (match) visibleCount++;
+            });
+            document.getElementById('active-project-count').textContent = `${visibleCount} Active`;
+        }
+
+        // TOAST ENGINE COPY SYSTEM
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        function copyDetail(textToCopy, label) {
+            const el = document.createElement('textarea'); el.value = textToCopy; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            toastMessage.textContent = `${label} data copied securely!`;
+            toast.style.opacity = "1"; toast.style.pointerEvents = "auto";
+            setTimeout(() => { toast.style.opacity = "0"; toast.style.pointerEvents = "none"; }, 2000);
+        }
+
+        // Initialize display components values
+        applyLiveUpdates();
+    </script>
+</body>
+</html>
