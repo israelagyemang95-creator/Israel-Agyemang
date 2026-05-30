@@ -4,230 +4,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sankofa Impact Initiative - Admin Pro</title>
+    <title>Sankofa Impact Initiative</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
-        .news-ticker { animation: scroll 25s linear infinite; }
-        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: white; }
+        .full-modal { position: fixed; inset: 0; background: #1e293b; z-index: 100; overflow-y: auto; padding: 20px; display: none; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 pb-20">
+<body class="pb-10">
 
-    <div class="bg-indigo-600 text-white py-2 overflow-hidden whitespace-nowrap">
-        <div class="news-ticker inline-block font-bold text-xs uppercase tracking-widest" id="ticker-text">
-            🚨 Loading latest initiative updates... • 🌍 Join our mission for a better Ghana
-        </div>
-    </div>
-
-    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-xl">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">🌱</span>
-                <h1 class="text-lg font-black tracking-tighter" id="nav-title" data-key="nav-title">SANKOFA IMPACT</h1>
-            </div>
-            <div class="flex items-center gap-2.5">
-                <button onclick="openAdminModal()" class="bg-white/10 hover:bg-white/20 border border-white/20 text-[10px] md:text-xs px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 text-white font-bold">
-                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                    <span data-key="settings-btn">Settings</span>
-                </button>
-                <select onchange="changeLanguage(this.value)" class="bg-white/10 border border-white/20 rounded-lg text-[10px] p-2 font-bold text-white focus:outline-none">
-                    <option value="en" class="text-slate-900">EN 🇬🇧</option>
-                    <option value="fr" class="text-slate-900">FR 🇫🇷</option>
-                    <option value="sw" class="text-slate-900">SW 🇰🇪</option>
-                </select>
-                <button onclick="toggleCurrency()" id="curr-btn" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-[10px] px-3 py-2.5 rounded-full font-bold shadow-lg transition-all text-white">Switch to $</button>
-            </div>
+    <header class="p-4 flex justify-between items-center border-b border-slate-800 sticky top-0 bg-slate-900 z-50">
+        <div class="font-black text-xl tracking-tighter">SANKOFA IMPACT</div>
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('admin-menu').style.display='block'" class="bg-slate-800 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700">Settings</button>
+            <button onclick="toggleCurrency()" id="curr-btn" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold">Switch to $</button>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 mt-6 space-y-6">
+    <main class="max-w-xl mx-auto p-4 space-y-6">
         
-        <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <div class="flex justify-between items-center mb-4">
+        <div class="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+            <p class="text-[10px] uppercase font-bold text-slate-400">Live Verified Funding</p>
+            <h2 class="text-4xl font-black mt-1" id="display-total">GH₵ 345,000</h2>
+            <div class="flex justify-between mt-6 text-center border-t border-slate-700 pt-4">
+                <div><p class="text-[9px] text-slate-400">AID PROGRAM</p><p id="aid-p" class="font-bold text-emerald-400">--</p></div>
+                <div><p class="text-[9px] text-slate-400">FIELD OPS</p><p id="field-p" class="font-bold text-emerald-400">--</p></div>
+                <div><p class="text-[9px] text-slate-400">ADMIN</p><p id="admin-p" class="font-bold text-slate-400">--</p></div>
+            </div>
+            <div class="mt-4 h-32 flex justify-center"><canvas id="mainChart"></canvas></div>
+        </div>
+
+        <div class="bg-indigo-900/30 p-6 rounded-3xl border border-indigo-500/30">
+            <h3 class="font-bold text-sm mb-4 flex items-center gap-2">⚡ Impact Simulator</h3>
+            <input type="range" id="simSlider" min="100" max="100000" step="100" value="5000" class="w-full h-2 bg-slate-700 rounded-lg accent-emerald-400 appearance-none cursor-pointer">
+            <div class="flex justify-between mt-4">
                 <div>
-                    <h3 class="font-extrabold text-sm uppercase tracking-tighter text-slate-900" data-key="stories-title">Field Success Stories</h3>
-                    <p class="text-xs text-slate-500" data-key="stories-subtitle">Live photographic updates</p>
+                    <p class="text-[10px] text-slate-400">CONTRIBUTION</p>
+                    <p id="sim-val" class="text-2xl font-black text-emerald-400">GH₵ 5,000</p>
                 </div>
-                <button onclick="shareLink()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                    <i data-lucide="share-2" class="w-4 h-4"></i>
-                    <span data-key="share-btn">Share App</span>
-                </button>
-            </div>
-            <div id="stories-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                </div>
-        </section>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div class="lg:col-span-8 space-y-6">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-4">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" data-key="live-funding">Live Verified Funding</p>
-                            <h2 class="text-4xl font-black text-slate-900 font-mono" id="display-total">GH₵ 0</h2>
-                            <p class="text-[10px] text-indigo-600 font-semibold mt-1"><span data-key="total-expenses">Total Expenses</span>: <span id="display-expenses" class="font-mono">GH₵ 0</span></p>
-                        </div>
-                        <div class="h-24 w-24"><canvas id="mainChart"></canvas></div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 border-t pt-4">
-                        <div class="text-center">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider" data-key="aid-direct">Aid Program</p>
-                            <p id="aid-p" class="text-sm font-bold text-teal-600 font-mono">--</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider" data-key="field-ops">Field Ops</p>
-                            <p id="field-p" class="text-sm font-bold text-emerald-600 font-mono">--</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider" data-key="admin-label">Admin</p>
-                            <p id="admin-p" class="text-sm font-bold text-slate-500 font-mono">--</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 p-6 rounded-3xl text-white relative overflow-hidden">
-                    <h3 class="font-bold flex items-center gap-2 mb-4 text-sm tracking-tight"><i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> <span data-key="simulator-title">Impact Simulator</span></h3>
-                    <input type="range" id="simSlider" min="100" max="100000" step="100" value="5000" class="w-full h-2 bg-slate-700 rounded-lg accent-emerald-400 cursor-pointer">
-                    <div class="flex justify-between mt-4">
-                        <div>
-                            <p class="text-[10px] text-slate-400 uppercase" data-key="simulator-sub">Contribution</p>
-                            <p id="sim-val" class="text-2xl font-black text-emerald-400 font-mono">--</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[10px] text-slate-400 uppercase" data-key="lives-reached">Lives Reached</p>
-                            <p id="sim-impact" class="text-2xl font-black font-mono">~ 0</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                    <h3 class="font-black text-sm uppercase tracking-tighter text-slate-900 mb-4" data-key="projects-title">Active Projects</h3>
-                    <div id="project-list" class="space-y-3">
-                        </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-slate-400">LIVES REACHED</p>
+                    <p id="sim-impact" class="text-2xl font-black text-white">~ 125 People</p>
                 </div>
             </div>
         </div>
 
-        <div id="admin-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-0 md:p-6 z-50">
-            <div class="bg-slate-100 w-full h-full md:h-[95vh] md:max-w-7xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                <div class="p-6 bg-white border-b border-slate-200 flex justify-between items-center">
-                    <h2 class="text-xl font-black text-slate-900">System Dashboard & CMS</h2>
-                    <button onclick="closeAdminModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-                        <i data-lucide="x" class="w-4 h-4"></i><span>Exit</span>
-                    </button>
-                </div>
-                
-                <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div class="lg:col-span-8 space-y-6">
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200">
-                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-4">Core Settings</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div><label class="block text-[10px] font-bold mb-1">Total Raised (GHS)</label><input type="number" id="set-total" class="w-full p-2 border rounded-lg text-xs"></div>
-                                    <div><label class="block text-[10px] font-bold mb-1">Rate (1$ = ?)</label><input type="number" id="set-rate" step="0.1" class="w-full p-2 border rounded-lg text-xs"></div>
-                                </div>
-                            </div>
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200">
-                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-4">Security</h4>
-                                <input type="password" id="new-password" placeholder="New Password" class="w-full p-2 border rounded-lg text-xs mb-2">
-                                <button onclick="updateAdminPassword()" class="bg-slate-800 text-white text-[10px] px-4 py-2 rounded-lg font-bold">Update Key</button>
-                            </div>
-                        </div>
-                        <div class="lg:col-span-4 space-y-6">
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200">
-                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-4">Add Story (Image Upload)</h4>
-                                <input type="text" id="story-region" placeholder="Region" class="w-full p-2 border rounded-lg text-xs mb-2">
-                                <input type="text" id="story-title" placeholder="Story Title" class="w-full p-2 border rounded-lg text-xs mb-2">
-                                <textarea id="story-desc" placeholder="Details..." class="w-full p-2 border rounded-lg text-xs mb-2 h-16"></textarea>
-                                <input type="file" id="story-file-uploader" accept="image/*" class="w-full text-xs mb-3">
-                                <button onclick="publishSuccessStory()" class="w-full py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Publish Story</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 bg-white border-t border-slate-200 flex gap-2">
-                    <input type="password" id="admin-pass-modal" placeholder="Verify Password" class="p-2 border rounded-xl text-xs flex-1">
-                    <button onclick="saveAllSettings()" class="bg-slate-900 text-white px-8 py-2 rounded-xl font-bold text-sm">Save Changes</button>
-                </div>
-            </div>
+        <div class="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+            <h3 class="font-bold text-sm mb-4">ACTIVE PROJECTS</h3>
+            <div id="project-list" class="space-y-3"></div>
         </div>
     </main>
 
+    <div id="admin-menu" class="full-modal">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-black">System Settings</h2>
+            <button onclick="document.getElementById('admin-menu').style.display='none'" class="bg-red-500/20 text-red-500 px-4 py-2 rounded-xl font-bold">Close</button>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                <label class="block text-xs font-bold mb-2 text-slate-400">Total Raised (GHS)</label>
+                <input type="number" id="set-total" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+            </div>
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                <label class="block text-xs font-bold mb-2 text-slate-400">Admin Password</label>
+                <input type="password" id="admin-pass" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none" placeholder="Enter password to save">
+            </div>
+            <button onclick="saveSettings()" class="w-full bg-emerald-600 p-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-600/20">Apply All Changes</button>
+        </div>
+    </div>
+
     <script>
-        lucide.createIcons();
         let adminPassword = "1234";
         let siteData = {
-            totalGHS: 345000, rate: 14.5, currency: 'GHS', lang: 'en', momo: "0590000000", ticker: "🚨 Updates pending...",
-            projects: [{ name: "Water Project", desc: "Regional support.", status: "Planning", cost: 45000, spent: 28000 }],
-            stories: [{ region: "Wa Central", title: "Solar Well", desc: "Serving 4k people.", media: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400", isVideo: false }],
-            ledger: []
+            totalGHS: 345000, rate: 14.5, currency: 'GHS',
+            projects: [
+                { name: "Wa Water Supply", status: "Procurement", cost: 45000 },
+                { name: "Maternal Health Kits", status: "In Progress", cost: 12000 }
+            ]
         };
 
         function refreshUI() {
-            const factor = siteData.currency === 'GHS' ? 1 : 1/siteData.rate;
-            const symbol = siteData.currency === 'GHS' ? 'GH₵' : '$';
-            document.getElementById('display-total').textContent = `${symbol} ${(siteData.totalGHS * factor).toLocaleString()}`;
-            renderStoriesGrid();
-            updateSliderDisplay();
-        }
-
-        function renderStoriesGrid() {
-            const grid = document.getElementById('stories-grid');
-            grid.innerHTML = siteData.stories.map(s => `
-                <div class="bg-slate-50 border rounded-2xl overflow-hidden shadow-sm">
-                    <div class="h-40 bg-cover bg-center" style="background-image: url('${s.media}');"></div>
-                    <div class="p-3">
-                        <span class="text-[9px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">${s.region}</span>
-                        <h4 class="font-bold text-xs mt-1">${s.title}</h4>
-                        <p class="text-[10px] text-slate-500 mt-1">${s.desc}</p>
-                    </div>
-                </div>`).join('');
-        }
-
-        function publishSuccessStory() {
-            const fileInput = document.getElementById('story-file-uploader');
-            const file = fileInput.files[0];
-            if (!file) return alert("Select an image first!");
+            const sym = siteData.currency === 'GHS' ? 'GH₵' : '$';
+            const factor = siteData.currency === 'GHS' ? 1 : (1/siteData.rate);
             
-            siteData.stories.unshift({
-                region: document.getElementById('story-region').value,
-                title: document.getElementById('story-title').value,
-                desc: document.getElementById('story-desc').value,
-                media: URL.createObjectURL(file),
-                isVideo: false
-            });
-            refreshUI();
+            document.getElementById('display-total').innerText = `${sym} ${(siteData.totalGHS * factor).toLocaleString()}`;
+            document.getElementById('aid-p').innerText = `${sym} ${(siteData.totalGHS * 0.84 * factor).toLocaleString(undefined, {maximumFractionDigits:0})}`;
+            document.getElementById('field-p').innerText = `${sym} ${(siteData.totalGHS * 0.11 * factor).toLocaleString(undefined, {maximumFractionDigits:0})}`;
+            document.getElementById('admin-p').innerText = `${sym} ${(siteData.totalGHS * 0.05 * factor).toLocaleString(undefined, {maximumFractionDigits:0})}`;
+
+            const list = document.getElementById('project-list');
+            list.innerHTML = siteData.projects.map(p => `
+                <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-white">${p.name}</span>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg uppercase">${p.status}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">Budget: ${sym} ${(p.cost * factor).toLocaleString()}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('set-total').value = siteData.totalGHS;
+            updateSliderDisplay();
+            updateChart();
         }
 
         const slider = document.getElementById('simSlider');
         function updateSliderDisplay() {
             const val = parseInt(slider.value);
-            const symbol = siteData.currency === 'GHS' ? 'GH₵' : '$';
-            document.getElementById('sim-val').textContent = `${symbol} ${val.toLocaleString()}`;
+            const sym = siteData.currency === 'GHS' ? 'GH₵' : '$';
+            document.getElementById('sim-val').innerText = `${sym} ${val.toLocaleString()}`;
             const ghsVal = siteData.currency === 'GHS' ? val : val * siteData.rate;
-            document.getElementById('sim-impact').textContent = `~ ${Math.floor(ghsVal/40)} People`;
+            document.getElementById('sim-impact').innerText = `~ ${Math.floor(ghsVal/40).toLocaleString()} People`;
         }
-        slider.addEventListener('input', updateSliderDisplay);
+        slider.oninput = updateSliderDisplay;
 
-        function openAdminModal() { document.getElementById('admin-modal').classList.remove('hidden'); }
-        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
-        function toggleCurrency() { siteData.currency = siteData.currency === 'GHS' ? 'USD' : 'GHS'; refreshUI(); }
-        
-        function saveAllSettings() {
-            if (document.getElementById('admin-pass-modal').value !== adminPassword) return alert("Wrong Password!");
-            siteData.totalGHS = parseFloat(document.getElementById('set-total').value);
-            siteData.rate = parseFloat(document.getElementById('set-rate').value);
+        function toggleCurrency() {
+            siteData.currency = siteData.currency === 'GHS' ? 'USD' : 'GHS';
+            document.getElementById('curr-btn').innerText = siteData.currency === 'GHS' ? 'Switch to $' : 'Switch to GH₵';
             refreshUI();
-            closeAdminModal();
         }
 
-        refreshUI();
+        function saveSettings() {
+            if (document.getElementById('admin-pass').value !== adminPassword) return alert("Wrong Password!");
+            siteData.totalGHS = parseFloat(document.getElementById('set-total').value);
+            refreshUI();
+            document.getElementById('admin-menu').style.display = 'none';
+        }
+
+        let chart;
+        function updateChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { datasets: [{ data: [84, 11, 5], backgroundColor: ['#10b981', '#059669', '#475569'], borderWidth: 0 }] },
+                options: { cutout: '80%' }
+            });
+        }
+
+        window.onload = refreshUI;
     </script>
 </body>
 </html>
