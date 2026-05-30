@@ -9,144 +9,250 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: white; }
-        .full-modal { position: fixed; inset: 0; background: #1e293b; z-index: 100; overflow-y: auto; padding: 20px; display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .full-screen-menu {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        /* Custom range slider styling */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-12">
 
-    <header class="p-4 flex justify-between items-center border-b border-slate-800 sticky top-0 bg-slate-900 z-50">
-        <div class="font-black text-xl tracking-tighter">SANKOFA IMPACT</div>
-        <div class="flex gap-2">
-            <button onclick="document.getElementById('admin-menu').style.display='block'" class="bg-slate-800 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700">Settings</button>
-            <button onclick="toggleCurrency()" id="curr-btn" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold">Switch to $</button>
-        </div>
-    </header>
-
-    <main class="max-w-xl mx-auto p-4 space-y-6">
-        
-        <div class="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-            <p class="text-[10px] uppercase font-bold text-slate-400">Live Verified Funding</p>
-            <h2 class="text-4xl font-black mt-1" id="display-total">GH₵ 345,000</h2>
-            <div class="flex justify-between mt-6 text-center border-t border-slate-700 pt-4">
-                <div><p class="text-[9px] text-slate-400">AID PROGRAM</p><p id="aid-p" class="font-bold text-emerald-400">--</p></div>
-                <div><p class="text-[9px] text-slate-400">FIELD OPS</p><p id="field-p" class="font-bold text-emerald-400">--</p></div>
-                <div><p class="text-[9px] text-slate-400">ADMIN</p><p id="admin-p" class="font-bold text-slate-400">--</p></div>
+    <nav class="sticky top-0 z-40 glass px-4 py-4 flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+            <div class="bg-emerald-500 p-1.5 rounded-lg">
+                <i data-lucide="leaf" class="w-5 h-5 text-slate-900"></i>
             </div>
-            <div class="mt-4 h-32 flex justify-center"><canvas id="mainChart"></canvas></div>
+            <span class="font-extrabold text-xl tracking-tighter">SANKOFA</span>
         </div>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleCurrency()" id="curr-toggle" class="text-[10px] font-bold bg-white/10 px-3 py-2 rounded-full border border-white/10 uppercase tracking-wider">
+                Switch to $
+            </button>
+            <button onclick="openMenu()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 p-2 rounded-xl transition-all">
+                <i data-lucide="settings-2" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </nav>
 
-        <div class="bg-indigo-900/30 p-6 rounded-3xl border border-indigo-500/30">
-            <h3 class="font-bold text-sm mb-4 flex items-center gap-2">⚡ Impact Simulator</h3>
-            <input type="range" id="simSlider" min="100" max="100000" step="100" value="5000" class="w-full h-2 bg-slate-700 rounded-lg accent-emerald-400 appearance-none cursor-pointer">
-            <div class="flex justify-between mt-4">
+    <main class="max-w-md mx-auto px-4 space-y-6">
+
+        <section class="glass rounded-[2rem] p-8 relative overflow-hidden shadow-2xl">
+            <div class="relative z-10">
+                <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Live Verified Funding</p>
+                <h1 id="total-display" class="text-5xl font-black tracking-tight">GH₵ 345,000</h1>
+                
+                <div class="mt-8 grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold">Programs</p>
+                        <p id="prog-val" class="text-xs font-bold text-white mt-1">--</p>
+                    </div>
+                    <div class="text-center border-x border-white/10">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold">Field Ops</p>
+                        <p id="field-val" class="text-xs font-bold text-white mt-1">--</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold">Admin</p>
+                        <p id="admin-val" class="text-xs font-bold text-slate-400 mt-1">--</p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute -right-12 -bottom-12 opacity-20 w-48 h-48">
+                <canvas id="miniChart"></canvas>
+            </div>
+        </section>
+
+        <section class="glass rounded-[2rem] p-8 shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-bold flex items-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Impact Simulator
+                </h3>
+                <span class="text-[10px] bg-white/10 px-2 py-1 rounded-md text-slate-400 font-mono uppercase">Max 100k</span>
+            </div>
+            
+            <input type="range" id="impactSlider" min="100" max="100000" step="500" value="5000" 
+                class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer outline-none">
+            
+            <div class="flex justify-between mt-8">
                 <div>
-                    <p class="text-[10px] text-slate-400">CONTRIBUTION</p>
-                    <p id="sim-val" class="text-2xl font-black text-emerald-400">GH₵ 5,000</p>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">Your Gift</p>
+                    <p id="sim-gift" class="text-2xl font-black text-emerald-400">GH₵ 5,000</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] text-slate-400">LIVES REACHED</p>
-                    <p id="sim-impact" class="text-2xl font-black text-white">~ 125 People</p>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">Lives Reached</p>
+                    <p id="sim-reach" class="text-2xl font-black">~ 125</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-            <h3 class="font-bold text-sm mb-4">ACTIVE PROJECTS</h3>
-            <div id="project-list" class="space-y-3"></div>
-        </div>
+        <section class="space-y-4">
+            <div class="flex justify-between items-center px-2">
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Current Initiatives</h3>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-slate-600"></i>
+            </div>
+            <div id="project-container" class="space-y-3">
+                </div>
+        </section>
+
     </main>
 
-    <div id="admin-menu" class="full-modal">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black">System Settings</h2>
-            <button onclick="document.getElementById('admin-menu').style.display='none'" class="bg-red-500/20 text-red-500 px-4 py-2 rounded-xl font-bold">Close</button>
+    <div id="settings-menu" class="full-screen-menu">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-3xl font-black tracking-tighter">Control Panel</h2>
+            <button onclick="closeMenu()" class="p-3 bg-white/5 rounded-2xl">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
         </div>
-        
-        <div class="space-y-6">
-            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                <label class="block text-xs font-bold mb-2 text-slate-400">Total Raised (GHS)</label>
-                <input type="number" id="set-total" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
+
+        <div class="space-y-6 flex-1 overflow-y-auto">
+            <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-3">Update Total Funding (GHS)</label>
+                <input type="number" id="input-total" placeholder="345000" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xl font-bold focus:border-emerald-500 outline-none">
             </div>
-            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                <label class="block text-xs font-bold mb-2 text-slate-400">Admin Password</label>
-                <input type="password" id="admin-pass" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none" placeholder="Enter password to save">
+
+            <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-3">Security Access</label>
+                <input type="password" id="admin-pass" placeholder="Enter PIN" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xl font-bold outline-none">
             </div>
-            <button onclick="saveSettings()" class="w-full bg-emerald-600 p-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-600/20">Apply All Changes</button>
         </div>
+
+        <button onclick="applyChanges()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-5 rounded-[2rem] text-lg shadow-lg shadow-emerald-500/20 transition-all mt-6">
+            Apply Global Changes
+        </button>
     </div>
 
     <script>
-        let adminPassword = "1234";
-        let siteData = {
-            totalGHS: 345000, rate: 14.5, currency: 'GHS',
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 1. SITE STATE
+        let state = {
+            totalGHS: 345000,
+            rate: 14.5,
+            currency: 'GHS',
             projects: [
-                { name: "Wa Water Supply", status: "Procurement", cost: 45000 },
-                { name: "Maternal Health Kits", status: "In Progress", cost: 12000 }
+                { name: "Wa Water Supply", status: "Procurement", cost: 45000, color: "emerald" },
+                { name: "Maternal Health Kits", status: "Active", cost: 12500, color: "blue" },
+                { name: "School Supplies", status: "Planning", cost: 8000, color: "amber" }
             ]
         };
 
-        function refreshUI() {
-            const sym = siteData.currency === 'GHS' ? 'GH₵' : '$';
-            const factor = siteData.currency === 'GHS' ? 1 : (1/siteData.rate);
+        // 2. UI UPDATER
+        function updateUI() {
+            const sym = state.currency === 'GHS' ? 'GH₵' : '$';
+            const multiplier = state.currency === 'GHS' ? 1 : (1 / state.rate);
             
-            document.getElementById('display-total').innerText = `${sym} ${(siteData.totalGHS * factor).toLocaleString()}`;
-            document.getElementById('aid-p').innerText = `${sym} ${(siteData.totalGHS * 0.84 * factor).toLocaleString(undefined, {maximumFractionDigits:0})}`;
-            document.getElementById('field-p').innerText = `${sym} ${(siteData.totalGHS * 0.11 * factor).toLocaleString(undefined, {maximumFractionDigits:0})}`;
-            document.getElementById('admin-p').innerText = `${sym} ${(siteData.totalGHS * 0.05 * factor).toLocaleString(undefined, {maximumFractionDigits:0})}`;
+            // Update Main Display
+            document.getElementById('total-display').innerText = `${sym} ${(state.totalGHS * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+            
+            // Update Mini Breakdown
+            document.getElementById('prog-val').innerText = `${sym} ${(state.totalGHS * 0.84 * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+            document.getElementById('field-val').innerText = `${sym} ${(state.totalGHS * 0.11 * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+            document.getElementById('admin-val').innerText = `${sym} ${(state.totalGHS * 0.05 * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
 
-            const list = document.getElementById('project-list');
-            list.innerHTML = siteData.projects.map(p => `
-                <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-700">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-white">${p.name}</span>
-                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg uppercase">${p.status}</span>
+            // Update Projects
+            const container = document.getElementById('project-container');
+            container.innerHTML = state.projects.map(p => `
+                <div class="glass p-5 rounded-3xl flex justify-between items-center transition-all hover:scale-[1.02]">
+                    <div>
+                        <h4 class="font-bold text-sm text-white">${p.name}</h4>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Budget: ${sym} ${(p.cost * multiplier).toLocaleString()}</p>
                     </div>
-                    <p class="text-[10px] text-slate-500 mt-1">Budget: ${sym} ${(p.cost * factor).toLocaleString()}</p>
+                    <span class="text-[9px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                        ${p.status}
+                    </span>
                 </div>
             `).join('');
 
-            document.getElementById('set-total').value = siteData.totalGHS;
-            updateSliderDisplay();
-            updateChart();
+            updateSimulator();
+            drawChart();
         }
 
-        const slider = document.getElementById('simSlider');
-        function updateSliderDisplay() {
+        // 3. SIMULATOR LOGIC
+        const slider = document.getElementById('impactSlider');
+        function updateSimulator() {
             const val = parseInt(slider.value);
-            const sym = siteData.currency === 'GHS' ? 'GH₵' : '$';
-            document.getElementById('sim-val').innerText = `${sym} ${val.toLocaleString()}`;
-            const ghsVal = siteData.currency === 'GHS' ? val : val * siteData.rate;
-            document.getElementById('sim-impact').innerText = `~ ${Math.floor(ghsVal/40).toLocaleString()} People`;
+            const sym = state.currency === 'GHS' ? 'GH₵' : '$';
+            document.getElementById('sim-gift').innerText = `${sym} ${val.toLocaleString()}`;
+            
+            const ghsValue = state.currency === 'GHS' ? val : val * state.rate;
+            const lives = Math.floor(ghsValue / 40); // 40 GHS per life impacted
+            document.getElementById('sim-reach').innerText = `~ ${lives.toLocaleString()}`;
         }
-        slider.oninput = updateSliderDisplay;
+        slider.oninput = updateSimulator;
 
+        // 4. SETTINGS CONTROLS
+        function openMenu() { document.getElementById('settings-menu').style.display = 'flex'; }
+        function closeMenu() { document.getElementById('settings-menu').style.display = 'none'; }
+        
         function toggleCurrency() {
-            siteData.currency = siteData.currency === 'GHS' ? 'USD' : 'GHS';
-            document.getElementById('curr-btn').innerText = siteData.currency === 'GHS' ? 'Switch to $' : 'Switch to GH₵';
-            refreshUI();
+            state.currency = state.currency === 'GHS' ? 'USD' : 'GHS';
+            document.getElementById('curr-toggle').innerText = state.currency === 'GHS' ? 'Switch to $' : 'Switch to GH₵';
+            updateUI();
         }
 
-        function saveSettings() {
-            if (document.getElementById('admin-pass').value !== adminPassword) return alert("Wrong Password!");
-            siteData.totalGHS = parseFloat(document.getElementById('set-total').value);
-            refreshUI();
-            document.getElementById('admin-menu').style.display = 'none';
+        function applyChanges() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass !== "1234") return alert("Access Denied: Invalid PIN");
+            
+            const newTotal = document.getElementById('input-total').value;
+            if (newTotal) state.totalGHS = parseFloat(newTotal);
+            
+            updateUI();
+            closeMenu();
+            document.getElementById('admin-pass').value = ""; // Reset pass
         }
 
-        let chart;
-        function updateChart() {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            if(chart) chart.destroy();
-            chart = new Chart(ctx, {
+        // 5. CHARTING
+        let myChart = null;
+        function drawChart() {
+            const ctx = document.getElementById('miniChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: { datasets: [{ data: [84, 11, 5], backgroundColor: ['#10b981', '#059669', '#475569'], borderWidth: 0 }] },
-                options: { cutout: '80%' }
+                data: {
+                    datasets: [{
+                        data: [84, 11, 5],
+                        backgroundColor: ['#10b981', '#059669', '#334155'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { cutout: '80%', events: [] }
             });
         }
 
-        window.onload = refreshUI;
+        // Start App
+        window.onload = updateUI;
     </script>
 </body>
 </html>
