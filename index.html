@@ -1,258 +1,190 @@
-   
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sankofa Impact Initiative</title>
+    <title>Sankofa Impact Initiative | Admin Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #0f172a; 
-            color: #f8fafc;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .full-screen-menu {
-            position: fixed;
-            inset: 0;
-            background: #0f172a;
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            padding: 24px;
-        }
-
-        /* Custom range slider styling */
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #10b981;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .full-modal { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: none; flex-direction: column; padding: 24px; overflow-y: auto; }
+        .ticker-wrap { background: #4f46e5; color: white; padding: 8px 0; overflow: hidden; white-space: nowrap; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .ticker-move { display: inline-block; animation: ticker 20s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
-<body class="pb-12">
+<body>
 
-    <nav class="sticky top-0 z-40 glass px-4 py-4 flex justify-between items-center mb-6">
+    <div class="ticker-wrap">
+        <div class="ticker-move" id="ticker-display">🚨 LOADING LATEST FIELD UPDATES FROM WA CENTRAL... JOIN THE MOVEMENT</div>
+    </div>
+
+    <nav class="sticky top-0 z-40 glass px-4 py-4 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <div class="bg-emerald-500 p-1.5 rounded-lg">
-                <i data-lucide="leaf" class="w-5 h-5 text-slate-900"></i>
-            </div>
+            <div class="bg-emerald-500 p-1.5 rounded-lg"><i data-lucide="leaf" class="w-5 h-5 text-slate-900"></i></div>
             <span class="font-extrabold text-xl tracking-tighter">SANKOFA</span>
         </div>
-        <div class="flex items-center gap-3">
-            <button onclick="toggleCurrency()" id="curr-toggle" class="text-[10px] font-bold bg-white/10 px-3 py-2 rounded-full border border-white/10 uppercase tracking-wider">
-                Switch to $
-            </button>
-            <button onclick="openMenu()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 p-2 rounded-xl transition-all">
-                <i data-lucide="settings-2" class="w-5 h-5"></i>
-            </button>
+        <div class="flex gap-2">
+            <button onclick="toggleCurrency()" id="curr-toggle" class="text-[10px] font-bold bg-white/10 px-3 py-2 rounded-full border border-white/10 uppercase">Switch to $</button>
+            <button onclick="openMenu('settings-menu')" class="bg-white/10 p-2 rounded-xl border border-white/10"><i data-lucide="settings" class="w-5 h-5"></i></button>
         </div>
     </nav>
 
-    <main class="max-w-md mx-auto px-4 space-y-6">
+    <main class="max-w-md mx-auto px-4 py-6 space-y-8">
 
-        <section class="glass rounded-[2rem] p-8 relative overflow-hidden shadow-2xl">
-            <div class="relative z-10">
-                <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Live Verified Funding</p>
-                <h1 id="total-display" class="text-5xl font-black tracking-tight">GH₵ 345,000</h1>
-                
-                <div class="mt-8 grid grid-cols-3 gap-4">
-                    <div class="text-center">
-                        <p class="text-[9px] text-slate-400 uppercase font-bold">Programs</p>
-                        <p id="prog-val" class="text-xs font-bold text-white mt-1">--</p>
-                    </div>
-                    <div class="text-center border-x border-white/10">
-                        <p class="text-[9px] text-slate-400 uppercase font-bold">Field Ops</p>
-                        <p id="field-val" class="text-xs font-bold text-white mt-1">--</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-[9px] text-slate-400 uppercase font-bold">Admin</p>
-                        <p id="admin-val" class="text-xs font-bold text-slate-400 mt-1">--</p>
-                    </div>
-                </div>
+        <section>
+            <div class="flex justify-between items-center mb-4 px-1">
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Field Stories</h3>
+                <span class="text-[10px] text-emerald-400 font-bold">Live Updates</span>
             </div>
-            <div class="absolute -right-12 -bottom-12 opacity-20 w-48 h-48">
-                <canvas id="miniChart"></canvas>
+            <div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar" id="stories-scroll">
+                </div>
+        </section>
+
+        <section class="glass rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+            <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Impact Funding</p>
+            <h1 id="total-display" class="text-4xl font-black mb-6">GH₵ 345,000</h1>
+            <div class="grid grid-cols-3 gap-2 border-t border-white/10 pt-6">
+                <div class="text-center"><p class="text-[8px] text-slate-500 font-bold uppercase">Aid</p><p id="aid-val" class="text-xs font-bold">--</p></div>
+                <div class="text-center border-x border-white/10"><p class="text-[8px] text-slate-500 font-bold uppercase">Ops</p><p id="field-val" class="text-xs font-bold">--</p></div>
+                <div class="text-center"><p class="text-[8px] text-slate-500 font-bold uppercase">Adm</p><p id="admin-val" class="text-xs font-bold text-slate-500">--</p></div>
+            </div>
+            <div class="absolute -right-8 -bottom-8 opacity-10 w-32 h-32"><canvas id="miniChart"></canvas></div>
+        </section>
+
+        <section class="glass rounded-[2rem] p-6">
+            <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Simulator</h3>
+            <input type="range" id="impactSlider" min="100" max="100000" step="500" value="5000" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            <div class="flex justify-between mt-6">
+                <div><p class="text-[9px] font-bold text-slate-500 uppercase">Gift</p><p id="sim-gift" class="text-xl font-black text-emerald-400">GH₵ 5,000</p></div>
+                <div class="text-right"><p class="text-[9px] font-bold text-slate-500 uppercase">Reach</p><p id="sim-reach" class="text-xl font-black">~ 125</p></div>
             </div>
         </section>
 
-        <section class="glass rounded-[2rem] p-8 shadow-xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-sm font-bold flex items-center gap-2">
-                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Impact Simulator
-                </h3>
-                <span class="text-[10px] bg-white/10 px-2 py-1 rounded-md text-slate-400 font-mono uppercase">Max 100k</span>
-            </div>
-            
-            <input type="range" id="impactSlider" min="100" max="100000" step="500" value="5000" 
-                class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer outline-none">
-            
-            <div class="flex justify-between mt-8">
-                <div>
-                    <p class="text-[10px] font-bold text-slate-500 uppercase">Your Gift</p>
-                    <p id="sim-gift" class="text-2xl font-black text-emerald-400">GH₵ 5,000</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase">Lives Reached</p>
-                    <p id="sim-reach" class="text-2xl font-black">~ 125</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="space-y-4">
-            <div class="flex justify-between items-center px-2">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Current Initiatives</h3>
-                <i data-lucide="arrow-right" class="w-4 h-4 text-slate-600"></i>
-            </div>
-            <div id="project-container" class="space-y-3">
-                </div>
+        <section class="space-y-3">
+            <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 px-1">Active Projects</h3>
+            <div id="project-list" class="space-y-3"></div>
         </section>
 
     </main>
 
-    <div id="settings-menu" class="full-screen-menu">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-3xl font-black tracking-tighter">Control Panel</h2>
-            <button onclick="closeMenu()" class="p-3 bg-white/5 rounded-2xl">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
+    <div id="project-modal" class="full-modal">
+        <div class="flex justify-between items-center mb-8">
+            <h2 id="modal-project-name" class="text-2xl font-black tracking-tighter">Project Detail</h2>
+            <button onclick="closeMenu('project-modal')" class="p-3 bg-white/5 rounded-2xl"><i data-lucide="x"></i></button>
         </div>
-
-        <div class="space-y-6 flex-1 overflow-y-auto">
-            <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-3">Update Total Funding (GHS)</label>
-                <input type="number" id="input-total" placeholder="345000" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xl font-bold focus:border-emerald-500 outline-none">
+        <div class="space-y-6">
+            <div id="modal-project-img" class="h-48 w-full rounded-3xl bg-cover bg-center"></div>
+            <div class="glass p-6 rounded-3xl">
+                <p id="modal-project-desc" class="text-sm text-slate-300 leading-relaxed"></p>
+                <div class="mt-6">
+                    <div class="flex justify-between text-[10px] font-bold mb-2 uppercase"><span>Progress</span><span id="modal-percent">70%</span></div>
+                    <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden"><div id="modal-bar" class="bg-emerald-500 h-full w-[70%]"></div></div>
+                </div>
             </div>
-
-            <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-3">Security Access</label>
-                <input type="password" id="admin-pass" placeholder="Enter PIN" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl text-xl font-bold outline-none">
-            </div>
+            <button class="w-full bg-emerald-500 text-slate-900 font-black py-4 rounded-2xl">Donate to this Project</button>
         </div>
+    </div>
 
-        <button onclick="applyChanges()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-5 rounded-[2rem] text-lg shadow-lg shadow-emerald-500/20 transition-all mt-6">
-            Apply Global Changes
-        </button>
+    <div id="settings-menu" class="full-modal">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-black">Admin Panel</h2>
+            <button onclick="closeMenu('settings-menu')" class="p-3 bg-white/5 rounded-2xl"><i data-lucide="x"></i></button>
+        </div>
+        <div class="space-y-4">
+            <div class="bg-white/5 p-4 rounded-2xl">
+                <label class="text-[10px] font-bold text-slate-500 uppercase">Total Funding (GHS)</label>
+                <input type="number" id="in-total" class="w-full bg-slate-900 p-3 rounded-xl mt-2 outline-none">
+            </div>
+            <div class="bg-white/5 p-4 rounded-2xl">
+                <label class="text-[10px] font-bold text-slate-500 uppercase">Ticker Message</label>
+                <input type="text" id="in-ticker" class="w-full bg-slate-900 p-3 rounded-xl mt-2 outline-none">
+            </div>
+            <div class="bg-white/5 p-4 rounded-2xl">
+                <label class="text-[10px] font-bold text-slate-500 uppercase">Security PIN</label>
+                <input type="password" id="in-pass" class="w-full bg-slate-900 p-3 rounded-xl mt-2 outline-none">
+            </div>
+            <button onclick="saveAdmin()" class="w-full bg-emerald-500 text-slate-900 font-black py-4 rounded-2xl mt-4">Save All Changes</button>
+        </div>
     </div>
 
     <script>
-        // Initialize Lucide Icons
         lucide.createIcons();
-
-        // 1. SITE STATE
         let state = {
-            totalGHS: 345000,
-            rate: 14.5,
-            currency: 'GHS',
+            totalGHS: 345000, rate: 14.5, currency: 'GHS', ticker: "🚨 NEW SOLAR WELL COMPLETED IN WA CENTRAL... IMPACTING 4,000 LIVES",
+            stories: [
+                { img: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400", title: "Well Opening" },
+                { img: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=400", title: "Field Visit" }
+            ],
             projects: [
-                { name: "Wa Water Supply", status: "Procurement", cost: 45000, color: "emerald" },
-                { name: "Maternal Health Kits", status: "Active", cost: 12500, color: "blue" },
-                { name: "School Supplies", status: "Planning", cost: 8000, color: "amber" }
+                { name: "Wa Water Supply", status: "Active", cost: 45000, desc: "Installing 3 high-capacity solar wells in the drought-affected regions of Wa.", progress: 65, img: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600" },
+                { name: "Maternal Health", status: "Complete", cost: 12500, desc: "Distributed 500 emergency birth kits to clinics in remote areas.", progress: 100, img: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=600" }
             ]
         };
 
-        // 2. UI UPDATER
         function updateUI() {
-            const sym = state.currency === 'GHS' ? 'GH₵' : '$';
-            const multiplier = state.currency === 'GHS' ? 1 : (1 / state.rate);
+            const m = state.currency === 'GHS' ? 1 : (1/state.rate);
+            const s = state.currency === 'GHS' ? 'GH₵' : '$';
             
-            // Update Main Display
-            document.getElementById('total-display').innerText = `${sym} ${(state.totalGHS * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+            document.getElementById('total-display').innerText = `${s} ${(state.totalGHS * m).toLocaleString()}`;
+            document.getElementById('ticker-display').innerText = state.ticker;
             
-            // Update Mini Breakdown
-            document.getElementById('prog-val').innerText = `${sym} ${(state.totalGHS * 0.84 * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-            document.getElementById('field-val').innerText = `${sym} ${(state.totalGHS * 0.11 * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-            document.getElementById('admin-val').innerText = `${sym} ${(state.totalGHS * 0.05 * multiplier).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-
-            // Update Projects
-            const container = document.getElementById('project-container');
-            container.innerHTML = state.projects.map(p => `
-                <div class="glass p-5 rounded-3xl flex justify-between items-center transition-all hover:scale-[1.02]">
-                    <div>
-                        <h4 class="font-bold text-sm text-white">${p.name}</h4>
-                        <p class="text-[10px] text-slate-500 mt-0.5">Budget: ${sym} ${(p.cost * multiplier).toLocaleString()}</p>
-                    </div>
-                    <span class="text-[9px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
-                        ${p.status}
-                    </span>
+            // Stories
+            document.getElementById('stories-scroll').innerHTML = state.stories.map(st => `
+                <div class="min-w-[140px] h-48 rounded-3xl bg-cover bg-center relative shadow-xl" style="background-image:url('${st.img}')">
+                    <div class="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2 py-1 rounded-lg text-[9px] font-bold">${st.title}</div>
                 </div>
             `).join('');
 
-            updateSimulator();
-            drawChart();
-        }
-
-        // 3. SIMULATOR LOGIC
-        const slider = document.getElementById('impactSlider');
-        function updateSimulator() {
-            const val = parseInt(slider.value);
-            const sym = state.currency === 'GHS' ? 'GH₵' : '$';
-            document.getElementById('sim-gift').innerText = `${sym} ${val.toLocaleString()}`;
+            // Projects
+            document.getElementById('project-list').innerHTML = state.projects.map((p, i) => `
+                <div onclick="openProject(${i})" class="glass p-5 rounded-3xl flex justify-between items-center hover:scale-[1.02] transition-all cursor-pointer">
+                    <div><h4 class="font-bold text-sm">${p.name}</h4><p class="text-[10px] text-slate-500">Budget: ${s} ${(p.cost*m).toLocaleString()}</p></div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600"></i>
+                </div>
+            `).join('');
             
-            const ghsValue = state.currency === 'GHS' ? val : val * state.rate;
-            const lives = Math.floor(ghsValue / 40); // 40 GHS per life impacted
-            document.getElementById('sim-reach').innerText = `~ ${lives.toLocaleString()}`;
+            lucide.createIcons();
+            updateSim();
         }
-        slider.oninput = updateSimulator;
 
-        // 4. SETTINGS CONTROLS
-        function openMenu() { document.getElementById('settings-menu').style.display = 'flex'; }
-        function closeMenu() { document.getElementById('settings-menu').style.display = 'none'; }
-        
-        function toggleCurrency() {
-            state.currency = state.currency === 'GHS' ? 'USD' : 'GHS';
-            document.getElementById('curr-toggle').innerText = state.currency === 'GHS' ? 'Switch to $' : 'Switch to GH₵';
+        function openProject(idx) {
+            const p = state.projects[idx];
+            document.getElementById('modal-project-name').innerText = p.name;
+            document.getElementById('modal-project-desc').innerText = p.desc;
+            document.getElementById('modal-project-img').style.backgroundImage = `url('${p.img}')`;
+            document.getElementById('modal-percent').innerText = p.progress + "%";
+            document.getElementById('modal-bar').style.width = p.progress + "%";
+            openMenu('project-modal');
+        }
+
+        function updateSim() {
+            const val = parseInt(document.getElementById('impactSlider').value);
+            const s = state.currency === 'GHS' ? 'GH₵' : '$';
+            const reach = state.currency === 'GHS' ? val/40 : (val*state.rate)/40;
+            document.getElementById('sim-gift').innerText = `${s} ${val.toLocaleString()}`;
+            document.getElementById('sim-reach').innerText = `~ ${Math.floor(reach).toLocaleString()}`;
+        }
+
+        document.getElementById('impactSlider').oninput = updateSim;
+        function openMenu(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeMenu(id) { document.getElementById(id).style.display = 'none'; }
+        function toggleCurrency() { state.currency = state.currency === 'GHS' ? 'USD' : 'GHS'; updateUI(); }
+
+        function saveAdmin() {
+            if(document.getElementById('in-pass').value !== "1234") return alert("Wrong PIN");
+            state.totalGHS = parseFloat(document.getElementById('in-total').value) || state.totalGHS;
+            state.ticker = document.getElementById('in-ticker').value || state.ticker;
             updateUI();
+            closeMenu('settings-menu');
         }
 
-        function applyChanges() {
-            const pass = document.getElementById('admin-pass').value;
-            if (pass !== "1234") return alert("Access Denied: Invalid PIN");
-            
-            const newTotal = document.getElementById('input-total').value;
-            if (newTotal) state.totalGHS = parseFloat(newTotal);
-            
-            updateUI();
-            closeMenu();
-            document.getElementById('admin-pass').value = ""; // Reset pass
-        }
-
-        // 5. CHARTING
-        let myChart = null;
-        function drawChart() {
-            const ctx = document.getElementById('miniChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [84, 11, 5],
-                        backgroundColor: ['#10b981', '#059669', '#334155'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '80%', events: [] }
-            });
-        }
-
-        // Start App
         window.onload = updateUI;
     </script>
 </body>
 </html>
+
