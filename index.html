@@ -1,84 +1,385 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sankofa Impact | Accountability Portal</title>
+    <title>Sankofa Impact | Global Accountability Portal</title>
+    <!-- External UI Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
-        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid #e2e8f0; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); z-index: 100; overflow-y: auto; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .full-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); z-index: 100; display: none; flex-direction: column; overflow-y: auto; padding: 1.5rem; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="pb-16">
 
-    <div class="max-w-6xl mx-auto space-y-8">
-        <header class="flex justify-between items-center">
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-600 p-2 rounded-xl text-white"><i data-lucide="leaf" class="w-6 h-6"></i></div>
             <div>
-                <h1 class="text-3xl font-black text-slate-900">SANKOFA</h1>
-                <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Accountability Portal</p>
-            </div>
-            <button onclick="document.getElementById('admin-modal').style.display='flex'" class="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-600/20">SETTINGS</button>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-900 text-white p-8 rounded-3xl">
-                <p class="text-slate-400 text-sm font-bold">Total Audited Funding</p>
-                <h2 class="text-4xl font-black mt-2" id="total-funds">GH₵ 345,000</h2>
-            </div>
-            <div class="glass p-8 rounded-3xl">
-                <p class="text-slate-500 text-sm font-bold">Impact Simulator</p>
-                <input type="range" id="sim-slider" min="1000" max="100000" class="w-full mt-4 accent-emerald-600">
-                <p class="mt-2 text-sm font-bold text-emerald-600" id="sim-text">Estimated impact for your gift.</p>
+                <h1 class="font-black text-xl text-slate-900 uppercase leading-none">SANKOFA</h1>
+                <p class="text-[9px] font-bold text-emerald-600 tracking-widest uppercase mt-0.5">Accountability Portal</p>
             </div>
         </div>
+        <button onclick="openModal('admin-pin-modal')" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 px-5 rounded-xl transition flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> SETTINGS
+        </button>
+    </nav>
 
-        <div class="glass p-8 rounded-3xl">
-            <h3 class="font-bold text-slate-900 mb-6">Transaction Ledger</h3>
-            <div id="ledger-list" class="space-y-3"></div>
+    <!-- Main Portal Content -->
+    <main class="max-w-7xl mx-auto px-6 mt-10 space-y-10">
+        
+        <!-- Live Audited Metrics Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <section class="lg:col-span-1 bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+                <div>
+                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-widest uppercase py-1 px-3 rounded-full border border-emerald-500/30">Live Status</span>
+                    <h2 class="text-4xl font-black mt-6" id="total-funds-display">GH₵ 345,000</h2>
+                    <p class="text-slate-400 text-xs font-semibold mt-1">Total Audited Funding Pools</p>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-800 flex items-center justify-between text-xs">
+                    <span class="text-slate-500 font-bold uppercase tracking-wider">Verification Regime</span>
+                    <span class="text-emerald-400 font-extrabold flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Real-time Active</span>
+                </div>
+            </section>
+
+            <!-- Interactive Impact Simulator Card -->
+            <section class="lg:col-span-2 glass-card rounded-[2rem] p-8 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-extrabold text-lg text-slate-900 flex items-center gap-2"><i data-lucide="calculator" class="text-emerald-600 w-5 h-5"></i> Gift Impact Simulator</h3>
+                    <p class="text-slate-400 text-xs mt-1">Slide the scale to evaluate how resource allocations map directly to field impact parameters.</p>
+                </div>
+                <div class="my-6">
+                    <input type="range" id="simulator-slider" min="5000" max="200000" step="5000" value="50000" class="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-2"><span>GH₵ 5,000</span><span>GH₵ 200,000+</span></div>
+                </div>
+                <div class="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Simulated Capacity</p>
+                        <p id="simulator-output-cash" class="text-xl font-black text-slate-900 mt-0.5">GH₵ 50,000</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-emerald-800" id="simulator-output-impact">Supports ~1,111 Beneficiaries</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Infrastructure & Field Metrics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Left & Center Columns: Active Initiatives & Ledger -->
+            <div class="lg:col-span-2 space-y-10">
+                <!-- Initiatives -->
+                <div class="glass-card p-8 rounded-[2rem]">
+                    <h3 class="font-extrabold text-xl mb-6 flex items-center gap-2"><i data-lucide="layers" class="text-emerald-600 w-5 h-5"></i> Active Field Initiatives</h3>
+                    <div id="project-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Live Transaction Ledger -->
+                <div class="glass-card p-8 rounded-[2rem]">
+                    <h3 class="font-extrabold text-xl mb-2 flex items-center gap-2"><i data-lucide="activity" class="text-emerald-600 w-5 h-5"></i> Live Transaction Ledger</h3>
+                    <p class="text-slate-400 text-xs mb-6">Transparent chronological records of all ecosystem operational debits.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="text-slate-400 text-xs uppercase font-bold border-b border-slate-100"><th class="pb-3">Reference/Entity</th><th class="pb-3">Allocation Unit</th><th class="pb-3 text-right">Debit Magnitude</th></tr>
+                            </thead>
+                            <tbody id="ledger-container" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Interactive Communications Hub -->
+            <div class="lg:col-span-1 space-y-10">
+                <!-- Live Stakeholder Meeting Links -->
+                <div class="glass-card p-8 rounded-[2rem] bg-gradient-to-br from-white to-slate-50/50">
+                    <h3 class="font-extrabold text-xl mb-1 flex items-center gap-2"><i data-lucide="video" class="text-emerald-600 w-5 h-5"></i> Stakeholder Forums</h3>
+                    <p class="text-slate-400 text-xs mb-6">Live video sync panels managed directly via open-access interfaces.</p>
+                    <div id="meetings-container" class="space-y-4"></div>
+                </div>
+
+                <!-- Stakeholder Opinions/Feedback Form & Feed -->
+                <div class="glass-card p-8 rounded-[2rem]">
+                    <h3 class="font-extrabold text-xl mb-1 flex items-center gap-2"><i data-lucide="message-square" class="text-emerald-600 w-5 h-5"></i> Community Pulse</h3>
+                    <p class="text-slate-400 text-xs mb-6">Public workspace opinions, reviews, and feedback pipelines.</p>
+                    
+                    <form id="feedback-form" onsubmit="handleFeedbackSubmit(event)" class="space-y-4 mb-6 pb-6 border-b border-slate-100">
+                        <div>
+                            <input type="text" id="fb-user" placeholder="Your Profile Handle (e.g. Stakeholder 01)" required class="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 font-medium">
+                        </div>
+                        <div>
+                            <textarea id="fb-comment" rows="3" placeholder="Provide strategic observations, questions, or project guidance..." required class="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 font-medium"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-2">
+                            <i data-lucide="send" class="w-3.5 h-3.5"></i> Submit Feedback
+                        </button>
+                    </form>
+
+                    <!-- Feed -->
+                    <div id="feedback-feed" class="space-y-4 max-h-[300px] overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Master Security Access Gate Modals -->
+    <div id="admin-pin-modal" class="full-modal items-center justify-center">
+        <div class="bg-slate-900 w-full max-w-sm rounded-[2rem] p-8 text-center border border-slate-800 shadow-2xl">
+            <div class="bg-emerald-500/10 text-emerald-500 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/20"><i data-lucide="shield-check"></i></div>
+            <h2 class="text-white font-extrabold text-xl mb-1">Verify Security Clearance</h2>
+            <p class="text-slate-400 text-xs mb-6">Enter administrative token signature</p>
+            <input type="password" id="admin-pin-input" placeholder="••••" class="w-full bg-slate-850 border border-slate-800 p-4 rounded-xl mb-4 text-center text-2xl font-black text-white focus:outline-none focus:border-emerald-500 tracking-widest">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeModal('admin-pin-modal')" class="bg-slate-800 text-slate-300 font-bold text-xs py-3 rounded-xl hover:bg-slate-750 transition">Cancel</button>
+                <button onclick="verifyPin()" class="bg-emerald-600 text-white font-bold text-xs py-3 rounded-xl hover:bg-emerald-700 transition">Verify Gate</button>
+            </div>
         </div>
     </div>
 
-    <div id="admin-modal" class="modal flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-3xl w-full max-w-sm">
-            <h2 class="font-black text-xl mb-4">Admin Access</h2>
-            <input type="password" id="pin" placeholder="Enter PIN" class="w-full p-4 bg-slate-100 rounded-xl mb-4">
-            <button onclick="verify()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl">LOGIN</button>
-            <button onclick="document.getElementById('admin-modal').style.display='none'" class="w-full mt-4 text-slate-400 font-bold text-xs">CANCEL</button>
+    <!-- Full Administrative Control Workspace Dashboard -->
+    <div id="admin-workspace-modal" class="full-modal">
+        <div class="max-w-4xl mx-auto w-full bg-white rounded-[2.5rem] p-8 my-auto shadow-2xl text-slate-900 border border-slate-100">
+            <div class="flex justify-between items-start pb-6 border-b border-slate-100 mb-6">
+                <div>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900">Ecosystem Management Engine</h2>
+                    <p class="text-slate-400 text-xs mt-0.5">Live platform adjustments, forum hosting controls, and verification parameters.</p>
+                </div>
+                <button onclick="closeModal('admin-workspace-modal')" class="bg-slate-100 text-slate-500 hover:bg-slate-200 p-2 rounded-xl transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Hand Control: Adjustments Panel -->
+                <div class="space-y-6">
+                    <h3 class="font-extrabold text-sm uppercase tracking-wider text-slate-400">Ledger Metrics Injection</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Update Total Pool Funding (GH₵)</label>
+                            <input type="number" id="adm-total-funds" class="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 text-sm font-semibold">
+                        </div>
+                        <button onclick="saveAdminCoreMetrics()" class="w-full bg-slate-900 text-white font-bold text-xs py-3.5 rounded-xl transition">Apply Capital Injections</button>
+                    </div>
+
+                    <!-- Add Google Meet Link -->
+                    <div class="pt-6 border-t border-slate-100">
+                        <h3 class="font-extrabold text-sm uppercase tracking-wider text-slate-400 mb-4">Deploy New Sync Forum</h3>
+                        <div class="space-y-4">
+                            <input type="text" id="adm-meet-title" placeholder="Meeting Topic Name" class="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs font-semibold">
+                            <input type="url" id="adm-meet-url" placeholder="Google Meet Link (https://meet.google.com/...)" class="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs font-semibold">
+                            <button onclick="addMeetingChannel()" class="w-full bg-emerald-600 text-white font-bold text-xs py-3.5 rounded-xl transition">Deploy Video Forum</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Hand Control: Feedback Moderation Board -->
+                <div class="flex flex-col h-full border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
+                    <h3 class="font-extrabold text-sm uppercase tracking-wider text-slate-400 mb-4">Pending Feedback Moderation Pool</h3>
+                    <div id="admin-moderation-pool" class="space-y-4 flex-1 overflow-y-auto max-h-[350px] pr-1"></div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Core Interactive Logic Layer -->
     <script>
-        const state = { funds: 345000, pin: "1234", ledger: [{d: "Solar Pump", a: 35000}, {d: "Maternal Kits", a: 22000}] };
+        // System Master Configuration Framework State
+        let state = {
+            totalGHS: 345000,
+            adminPin: "1234",
+            projects: [
+                { name: "Wa Water Infrastructure", budget: 150000, description: "Deep well water points & distribution loops." },
+                { name: "Sankofa Maternal Kits", budget: 50000, description: "Sterile delivery supply distributions." },
+                { name: "Asikuma School Sanitation", budget: 145000, description: "Modern bio-digester toilet structures." }
+            ],
+            ledger: [
+                { entity: "Maternal Health Wholesaler", allocation: "Purchase of 500 Medical Supply Kits", debit: 22000, date: "2026-05-28" },
+                { entity: "Wa Water Logistics Team", allocation: "Pumping Hardware & Rig Transport Freight", debit: 45000, date: "2026-05-15" }
+            ],
+            meetings: [
+                { title: "Quarterly Stakeholder Review", url: "https://meet.google.com/abc-defg-hij", date: "June 15, 2026" },
+                { title: "Field Engineering Alignment", url: "https://meet.google.com/xyz-mno-pqr", date: "June 22, 2026" }
+            ],
+            feedback: [
+                { id: 1, user: "Kofi Mensah", comment: "The structural water timeline for Wa appears well aligned. Requesting tracking on local community asset handovers.", approved: true },
+                { id: 2, user: "Donor Partner Alpha", comment: "Can we review structural distribution logs for the Maternal Kits during the next Sync meeting?", approved: true },
+                { id: 3, user: "Spam Account", comment: "Buy crypto tokens here!", approved: false } // Hidden until admin reviews
+            ]
+        };
 
-        function updateUI() {
-            document.getElementById('total-funds').innerText = `GH₵ ${state.funds.toLocaleString()}`;
-            document.getElementById('ledger-list').innerHTML = state.ledger.map(l => `
-                <div class="flex justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <span class="font-bold text-slate-700">${l.d}</span>
-                    <span class="font-black text-red-500">-${l.a.toLocaleString()}</span>
-                </div>`).join('');
+        // Initialize Structural App Displays
+        function renderApp() {
+            // Main Display Capital Injections
+            document.getElementById('total-funds-display').innerText = `GH₵ ${state.totalGHS.toLocaleString()}`;
+
+            // Initiatives Mapping Architecture
+            document.getElementById('project-container').innerHTML = state.projects.map(p => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-slate-900 text-base">${p.name}</h4>
+                        <span class="bg-slate-100 text-slate-700 font-extrabold text-[10px] py-1 px-2.5 rounded-md">GH₵ ${p.budget.toLocaleString()}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2 font-medium">${p.description}</p>
+                </div>
+            `).join('');
+
+            // Chronological Ledger Display Mapping
+            document.getElementById('ledger-container').innerHTML = state.ledger.map(l => `
+                <tr class="border-b border-slate-50 last:border-none">
+                    <td class="py-4 pr-2">
+                        <p class="font-bold text-slate-900">${l.entity}</p>
+                        <p class="text-[10px] text-slate-400 font-medium mt-0.5">${l.date}</p>
+                    </td>
+                    <td class="py-4 text-xs text-slate-400 font-semibold">${l.allocation}</td>
+                    <td class="py-4 text-right font-black text-rose-500">-GH₵ ${l.debit.toLocaleString()}</td>
+                </tr>
+            `).join('');
+
+            // Video Forums/Google Meet Module Mapping
+            document.getElementById('meetings-container').innerHTML = state.meetings.map(m => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-xs">${m.title}</h4>
+                        <p class="text-[10px] text-slate-400 font-bold mt-0.5">${m.date}</p>
+                    </div>
+                    <a href="${m.url}" target="_blank" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-black text-[10px] py-2 px-3 rounded-xl transition flex items-center gap-1">
+                        <i data-lucide="external-link" class="w-3 h-3"></i> JOIN
+                    </a>
+                </div>
+            `).join('');
+
+            // Render Community Feedback Stream (Only Display Approved Nodes)
+            document.getElementById('feedback-feed').innerHTML = state.feedback
+                .filter(f => f.approved)
+                .map(f => `
+                    <div class="bg-slate-50/70 border border-slate-100 p-4 rounded-xl space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-900 text-xs">${f.user}</span>
+                            <span class="text-[9px] font-black uppercase text-emerald-600 tracking-wider flex items-center gap-0.5"><i data-lucide="check" class="w-2.5 h-2.5"></i> Verified Donor</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium leading-relaxed">${f.comment}</p>
+                    </div>
+                `).join('');
+
+            // Render Admin Moderation Screen Engine Pool
+            const pendingList = state.feedback.filter(f => !f.approved);
+            if (pendingList.length === 0) {
+                document.getElementById('admin-moderation-pool').innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-6">No comments waiting in moderation queues.</p>`;
+            } else {
+                document.getElementById('admin-moderation-pool').innerHTML = pendingList.map(f => `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-between space-y-3">
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">${f.user}</p>
+                            <p class="text-xs text-slate-500 mt-1">${f.comment}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="rejectFeedback(${f.id})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] py-2 rounded-lg transition">Discard</button>
+                            <button onclick="approveFeedback(${f.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">Approve & Publish</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Sync Icons Everywhere
+            lucide.createIcons();
         }
 
-        function verify() {
-            if(document.getElementById('pin').value === state.pin) {
-                alert("Control Panel Unlocked.");
-                document.getElementById('admin-modal').style.display = 'none';
+        // Interactive Live Field Simulator Slider Calculus
+        document.getElementById('simulator-slider').oninput = function(e) {
+            const val = parseInt(e.target.value);
+            document.getElementById('simulator-output-cash').innerText = `GH₵ ${val.toLocaleString()}`;
+            // Math Formula: Roughly GH₵ 45 supports 1 structural person
+            const calculatedPeople = Math.floor(val / 45);
+            document.getElementById('simulator-output-impact').innerText = `Supports ~${calculatedPeople.toLocaleString()} Beneficiaries`;
+        };
+
+        // Handle Public Comment Generation Form Submissions
+        function handleFeedbackSubmit(event) {
+            event.preventDefault();
+            const userField = document.getElementById('fb-user');
+            const commentField = document.getElementById('fb-comment');
+
+            const newFeedback = {
+                id: Date.now(),
+                user: userField.value,
+                comment: commentField.value,
+                approved: false // Enforces Admin Review Sequence Rule
+            };
+
+            state.feedback.unshift(newFeedback);
+            renderApp();
+
+            alert("Thank you! Your feedback has been sent to the moderation queue for verification.");
+            userField.value = '';
+            commentField.value = '';
+        }
+
+        // Administrative Access Verification
+        function verifyPin() {
+            const entry = document.getElementById('admin-pin-input');
+            if (entry.value === state.adminPin) {
+                entry.value = '';
+                closeModal('admin-pin-modal');
+                // Seed Workspace values with present active values
+                document.getElementById('adm-total-funds').value = state.totalGHS;
+                openModal('admin-workspace-modal');
             } else {
-                alert("Wrong PIN.");
+                alert("Incorrect Security Authentication Key Token.");
+                entry.value = '';
             }
         }
 
-        document.getElementById('sim-slider').oninput = (e) => {
-            document.getElementById('sim-text').innerText = `Your GH₵ ${parseInt(e.target.value).toLocaleString()} supports ~${Math.floor(e.target.value/45)} people.`;
-        };
+        // Workspace Controls Operations Engine
+        function saveAdminCoreMetrics() {
+            const updatedFunds = document.getElementById('adm-total-funds').value;
+            if(updatedFunds) {
+                state.totalGHS = parseInt(updatedFunds);
+                renderApp();
+                alert("Ecosystem Funding Capital Pools Adjusted Successfully.");
+            }
+        }
 
-        window.onload = updateUI;
+        function addMeetingChannel() {
+            const titleField = document.getElementById('adm-meet-title');
+            const urlField = document.getElementById('adm-meet-url');
+
+            if(titleField.value && urlField.value) {
+                state.meetings.unshift({
+                    title: titleField.value,
+                    url: urlField.value,
+                    date: "Scheduled Live"
+                });
+                renderApp();
+                alert("New Sync Channel Deployed Successfully.");
+                titleField.value = '';
+                urlField.value = '';
+            } else {
+                alert("Ensure all Sync configurations are complete.");
+            }
+        }
+
+        function approveFeedback(id) {
+            const node = state.feedback.find(f => f.id === id);
+            if(node) node.approved = true;
+            renderApp();
+        }
+
+        function rejectFeedback(id) {
+            state.feedback = state.feedback.filter(f => f.id !== id);
+            renderApp();
+        }
+
+        // Open/Close System Interface Views Window Modals helper functions
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Start App Instance on Window Initialization Trigger
+        window.onload = renderApp;
     </script>
 </body>
 </html>
+
