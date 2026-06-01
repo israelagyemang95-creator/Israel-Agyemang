@@ -1708,3 +1708,359 @@ renderApp();
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankofa Impact - Accountability Portal</title>
+    <style>
+        :root {
+            --primary: #064e3b;       /* Deep Forest Green (Trust, Premium) */
+            --accent: #10b981;        /* Vibrant Emerald (Growth, Action) */
+            --accent-light: #ecfdf5;  /* Soft Mint Tint */
+            --text-dark: #0f172a;     /* Deep Slate for high-end readability */
+            --text-muted: #475569;    /* Medium Slate */
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --inner-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-dark);
+            background-color: #fafafa;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Premium Header Styling */
+        .header-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-logo {
+            width: 10px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 2px;
+            transform: rotate(15deg);
+        }
+
+        .portal-title {
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: -0.3px;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Custom Dropdown & Button Styling */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper select, .btn-utility {
+            appearance: none;
+            -webkit-appearance: none;
+            padding: 8px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .select-wrapper select {
+            padding-right: 26px;
+        }
+
+        .select-wrapper::after {
+            content: "▾";
+            font-size: 10px;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .btn-utility:hover, .select-wrapper select:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .btn-settings {
+            background: var(--primary) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        /* Hero Layout */
+        .hero {
+            padding: 40px 24px 24px 24px;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .tagline {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: inline-block;
+            background: var(--accent-light);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .headline {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.8px;
+            margin: 0 0 16px 0;
+            color: var(--primary);
+        }
+
+        .description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        /* Main Audited Pool Card */
+        .stats-card {
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            padding: 28px 24px;
+            border-radius: 24px;
+            color: white;
+            box-shadow: 0 20px 40px -10px rgba(6, 78, 59, 0.15);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle glowing background decoration for depth */
+        .stats-card::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(16, 185, 129, 0.15);
+            filter: blur(40px);
+            border-radius: 50%;
+        }
+
+        .stats-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #a7f3d0;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .amount {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 12px #10b981; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        /* Premium Gateways Layout */
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin: 0 0 14px 4px;
+        }
+
+        .gateway-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .gateway-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .gateway-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gateway-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .gateway-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.2px;
+        }
+
+        /* Actionable Copy Action UI */
+        .btn-copy {
+            background: var(--accent-light);
+            border: none;
+            color: #047857;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background: #d1fae5;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+
+<header class="header-nav">
+    <div class="brand-wrapper">
+        <div class="brand-logo"></div>
+        <span class="portal-title">Accountability Portal</span>
+    </div>
+    <div class="controls-row">
+        <div class="select-wrapper">
+            <select aria-label="Select Language">
+                <option>English 🇬🇧</option>
+                <option>Français 🇫🇷</option>
+                <option>Español 🇪🇸</option>
+                <option>Twi 🇬🇭</option>
+            </select>
+        </div>
+        <button class="btn-utility">GHS ₵</button>
+        <button class="btn-utility btn-settings">Settings</button>
+    </div>
+</header>
+
+<section class="hero">
+    <span class="tagline">Locally Led, Globally Trusted</span>
+    <h1 class="headline">Connecting Hearts,<br>Empowering Communities</h1>
+    <p class="description">
+        Welcome to our open auditing and impact space. Explore active initiatives, participate in direct stakeholder forums, and trace every currency allocation live.
+    </p>
+</section>
+
+<div class="dashboard-container">
+    <div class="stats-card">
+        <span class="stats-label">Live Audited Funding Pool</span>
+        <span class="amount">GH₵ 345,000</span>
+        <div class="sync-status">
+            <div class="dot"></div>
+            Decentralized Statement Ledger Synchronized
+        </div>
+    </div>
+
+    <h2 class="section-title">Verified Donation Gateways</h2>
+    
+    <div class="gateway-card">
+        <div class="gateway-meta">
+            <span class="gateway-label">Mobile Money Gateway</span>
+            <span class="gateway-value">024-555-1234</span>
+        </div>
+        <button class="btn-copy" onclick="navigator.clipboard.writeText('0245551234')">Copy</button>
+    </div>
+    
+    <div class="gateway-card">
+        <div class="gateway-meta">
+            <span class="gateway-label">Ecobank Account</span>
+            <span class="gateway-value">1441002345</span>
+        </div>
+        <button class="btn-copy" onclick="navigator.clipboard.writeText('1441002345')">Copy</button>
+    </div>
+</div>
+
+</body>
+</html>
